@@ -3,14 +3,15 @@ import time
 from classes.validations import Validations
 from classes.dbcontacts import DBContacts
 from classes.contacts import Contact
+from prettytable import PrettyTable
 
 validator = Validations()
-db = DBContacts
+db = DBContacts()
 
 def print_options():
     print("AGENDA DE CONTACTOS")
     print("*" * 50)
-    print("Selecciona una opcion:")
+    print("--Menu--")
     print("[C]rear contacto")
     print("[L]istado de contactos")
     print("[M]odificar contacto")
@@ -21,13 +22,13 @@ def print_options():
 def run():
     print_options()
 
-    command = input()
+    command = input("Selecciona una opcion: ")
     command = command.upper()
 
     if command == "C":
         create_contact()
     elif command == "L":
-        pass
+        list_contacts()
     elif command == "M":
         pass
     elif command == "E":
@@ -40,7 +41,7 @@ def run():
     else:
         print("Comando invalido")
         time.sleep(1)
-        run()
+    run()
 
 def create_contact():
     print("CREACION DE CONTACTO")
@@ -114,16 +115,36 @@ def check_contact_name(message, data_name):
     print(message)
     input_data = input()
     try:
-        getattr(validator, f"validation{data_name.capitalize()}")(input_data)
-        # getattr recibe almenos dos parametros
+        getattr(validator, f"validate{data_name.capitalize()}")(input_data)
+        # getattr es metodo que se utiliza par invocar metodos de forma dinamica; recibe almenos dos parametros
         # el primero es el metodo que se desea ejecutar
         # el segundo es el nombre del metodo que se desea ejecutar
-        # al final se agrega entre parentesis la informacion que espera recibir los parametros del metodo
+        # al final se agrega entre parentesis la informacion que espera recibir los parametros del metodo nombrado
         return input_data
     except ValueError as err:
         print(err)
         check_contact_name(message, data_name)
     
+def list_contacts():
+    list_contacts = db.list_contacts()
+
+    if not list_contacts:
+        print("Aun no hay contactos registrados")
+
+    table = PrettyTable(db.get_schema().keys())
+    for contact in list_contacts:
+        table.add_row([
+            contact.id_contact,
+            contact.name,
+            contact.surname,
+            contact.email,
+            contact.phone,
+            contact.birthday
+        ])
+
+    print(table)
+    print("Pulsa intro para salir")
+    command = input()
 
 if __name__ == "__main__":
     run()

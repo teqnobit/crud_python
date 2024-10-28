@@ -19,7 +19,7 @@ class DBbyCSV:
 
         with open(self._filename, mode="a", encoding="utf-16") as csv_file:
             data_writer = csv.writer(  # metodo writer permite escribir en el archivo usando el formato de csv
-                csvfile=csv_file, 
+                csv_file, 
                 delimiter=";", 
                 quotechar="\"", # Cada cadena de texto estara delimitada por comillas dobles (")
                 quoting=csv.QUOTE_MINIMAL, # Constante que define CUANDO los datos del csv deben ir encerrados entre comillas de forma automatica
@@ -32,7 +32,7 @@ class DBbyCSV:
     def get_last_id(self):
         list_ids = []
         with open(self._filename, mode="r", encoding="utf-16") as csv_file:
-            csv_reader = csv.reader(csvfile=csv_file, delimiter=";")
+            csv_reader = csv.reader(csv_file, delimiter=";")
             is_header = True
             for row in csv_reader:
                 if is_header:
@@ -47,3 +47,25 @@ class DBbyCSV:
         
         list_ids.sort(reverse=True)
         return int(list_ids[0])
+    
+    def get_all(self):
+        list_data = []
+        list_header = []
+
+        with open(self._filename, mode="r", encoding="utf-16") as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=";")
+            is_header = True
+            for row in csv_reader:
+                if is_header:
+                    list_header = row
+                    is_header = False
+                    continue
+
+                if row:
+                    file = {} # Diccionario de pares headers-valores
+                    for key, value in enumerate(row):
+                        file[list_header[key]] = value
+
+                    list_data.append(file)
+
+        return list_data
