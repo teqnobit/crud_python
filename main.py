@@ -1,8 +1,11 @@
 import os
 import time
 from classes.validations import Validations
+from classes.dbcontacts import DBContacts
+from classes.contacts import Contact
 
 validator = Validations()
+db = DBContacts
 
 def print_options():
     print("AGENDA DE CONTACTOS")
@@ -48,7 +51,14 @@ def create_contact():
     phone = check_contact_name("Introduce el telefono (solo 10 digitos sin espacios ni guiones):", "phone")
     birthday = check_contact_name("Introduce la fecha de nacimiento (YYYY-MM-DD):", "birthday")
 
+    contact = Contact(None, name, surname, email, phone, birthday)
+    if db.save_contacts(contact):
+        print("Contacto ingresado exitosamente")
+    else:
+        print("Error al guardar el contacto")
+
 ### Se puede simplificar, mirar mas abajo
+""" Funciones check_contact
 def check_name():
     print("Introduce el nombre del usuario:")
     name = input()
@@ -98,7 +108,7 @@ def check_birthday():
     except ValueError as err:
         print(err)
         check_birthday()
-
+"""
 ### Las instrucciones anteriores se pueden simplificar con la siguiente
 def check_contact_name(message, data_name):
     print(message)

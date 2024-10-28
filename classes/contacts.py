@@ -1,7 +1,8 @@
 class Contact:
 
     ## Constructor
-    def __init__(self, name, surname, email, phone, birthday):
+    def __init__(self, id_contact, name, surname, email, phone, birthday):
+        self._id_contact = id_contact
         self._name = name
         self._surname = surname
         self._email = email
@@ -10,6 +11,14 @@ class Contact:
 
     ## Getters y Setters
     @property # @property convierte una funciona en una funcion de solo lectura (getter)
+    def id_contact(self):
+        return self._id_contact
+
+    @id_contact.setter
+    def id_contact(self, id_contact):
+        self._id_contact = id_contact
+
+    @property 
     def name(self):
         return self._name
     
@@ -49,4 +58,3 @@ class Contact:
     def birthday(self, birthday):
         self._birthday = birthday
 
-    
