@@ -37,10 +37,9 @@ class DBContacts(DBbyCSV):
     
     def list_contacts(self):
         list_contacts = self.get_all()
-
-        if not list_contacts:
-            return None
+        return self._create_object_contacts(list_contacts)
         
+        """ Se remplazo por el metodo _create_object_contacts
         object_contacts = []
         # Convertimos los datos objetos de tipo Contact
         for contact in list_contacts:
@@ -55,6 +54,33 @@ class DBContacts(DBbyCSV):
             object_contacts.append(c)
 
         return object_contacts
+        """
     
+    def search_users(self, filters):
+        if 'NAME' not in filters and 'SURNAME' not in filters and 'EMAIL' not in filters:
+            raise ValueError("Debes enviar al menos un filtro")
+        
+        list_contacts = self.get_by_filter(filters)
+        return self._create_object_contacts(list_contacts)
+    
+    def _create_object_contacts(self, list_contacts):
+        if not list_contacts:
+            return None
+        
+        object_contacts = []
+        # convertirmos los datos a objetos de tipo Contact
+        for contact in list_contacts:
+            c = Contact(
+                contact["ID"], 
+                contact["NAME"],
+                contact["SURNAME"],
+                contact["EMAIL"],
+                contact["PHONE"],
+                contact["BIRTHDAY"]
+            )
+            object_contacts.append(c)
+
+        return object_contacts
+
     def get_schema(self):
         return SCHEMA

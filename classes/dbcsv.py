@@ -1,4 +1,5 @@
 import csv
+import re
 
 class DBbyCSV:
     def __init__(self, schema, filename):
@@ -6,7 +7,7 @@ class DBbyCSV:
         try:
             # Verificamos si ya existe el archivo
             f = open(self._filename)
-            f.close
+            f.close()
         except IOError:
             # Si el archivo no existe crearemos la cabecera
             with open(self._filename, mode="w", encoding="utf-16") as csv_file:
@@ -69,3 +70,30 @@ class DBbyCSV:
                     list_data.append(file)
 
         return list_data
+    
+    def get_by_filter(self, filters):
+        list_data = []
+        list_header = []
+
+        with open(self._filename, mode="r", encoding="utf-16") as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=";")
+            is_header = True
+            for row in csv_reader:
+                if is_header:
+                    list_header.append(row)
+                    is_header = False
+                    continue
+
+                if row:
+                    file = {}
+                    for key, value in enumerate(row):
+                        file[list_header[key]] = value
+
+                    for key_filter, value_filter in filters.items():
+                        matches = re.search(rf"{value_filter}", rf"{file[key_filter]}", re.IGNORECASE)
+                        if matches:
+                            list_data.append(file)
+                            break
+        #with csv_file
+        return list_data
+    

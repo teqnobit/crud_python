@@ -8,6 +8,7 @@ from prettytable import PrettyTable
 validator = Validations()
 db = DBContacts()
 
+### Imprimir Menu
 def print_options():
     print("AGENDA DE CONTACTOS")
     print("*" * 50)
@@ -19,6 +20,7 @@ def print_options():
     print("[B]uscar contacto")
     print("[S]alir")
 
+### Menu de acciones
 def run():
     print_options()
 
@@ -34,7 +36,7 @@ def run():
     elif command == "E":
         pass
     elif command == "B":
-        pass
+        search_contact()
     elif command == "S":
         print("GoodBye :)")
         os._exit(1)
@@ -43,6 +45,7 @@ def run():
         time.sleep(1)
     run()
 
+### Funciones auxiliares
 def create_contact():
     print("CREACION DE CONTACTO")
     print("*" * 50)
@@ -58,7 +61,22 @@ def create_contact():
     else:
         print("Error al guardar el contacto")
 
-### Se puede simplificar, mirar mas abajo
+### Forma dinamica de ejecutar metodos de nombre similar
+def check_contact_name(message, data_name):
+    print(message)
+    input_data = input()
+    try:
+        getattr(validator, f"validate{data_name.capitalize()}")(input_data)
+        # getattr es metodo que se utiliza par invocar metodos de forma dinamica; recibe almenos dos parametros
+        # el primero es el metodo que se desea ejecutar
+        # el segundo es el nombre del metodo que se desea ejecutar
+        # al final se agrega entre parentesis la informacion que espera recibir los parametros del metodo nombrado
+        return input_data
+    except ValueError as err:
+        print(err)
+        check_contact_name(message, data_name)
+
+## El siguiente bloque de codigo fue remplazo por la funcion anterior
 """ Funciones check_contact
 def check_name():
     print("Introduce el nombre del usuario:")
@@ -110,20 +128,6 @@ def check_birthday():
         print(err)
         check_birthday()
 """
-### Las instrucciones anteriores se pueden simplificar con la siguiente
-def check_contact_name(message, data_name):
-    print(message)
-    input_data = input()
-    try:
-        getattr(validator, f"validate{data_name.capitalize()}")(input_data)
-        # getattr es metodo que se utiliza par invocar metodos de forma dinamica; recibe almenos dos parametros
-        # el primero es el metodo que se desea ejecutar
-        # el segundo es el nombre del metodo que se desea ejecutar
-        # al final se agrega entre parentesis la informacion que espera recibir los parametros del metodo nombrado
-        return input_data
-    except ValueError as err:
-        print(err)
-        check_contact_name(message, data_name)
     
 def list_contacts():
     list_contacts = db.list_contacts()
@@ -131,6 +135,8 @@ def list_contacts():
     if not list_contacts:
         print("Aun no hay contactos registrados")
 
+    _print_table_contacts(list_contacts)
+    """ Remplazado
     table = PrettyTable(db.get_schema().keys())
     for contact in list_contacts:
         table.add_row([
@@ -143,7 +149,53 @@ def list_contacts():
         ])
 
     print(table)
-    print("Pulsa intro para salir")
+    print("Pulsa cualquier tecla para continuar")
+    command = input()
+    """
+
+def search_contact():
+    filters = {}
+
+    print("Buscar nombre (dejar vacio para usar otro filtro): ")
+    nombre = input()
+    if nombre:
+        filters["NAME"] = nombre
+
+    print("Buscar apellido (dejar vacio para usar otro filtro): ")
+    apellido = input()
+    if apellido:
+        filters["SURNAME"] = apellido
+
+    print("Buscar email (dejar vacio para usar otro filtro): ")
+    correo = input()
+    if correo:
+        filters["EMAIL"] = correo
+
+    try:
+        list_contacts = db.search_users(filters)
+        if not list_contacts:
+            return print("No hay ningun contacto con esos criterios de busqueda")
+        
+        _print_table_contacts(list_contacts)
+    except ValueError as err:
+        print(err)
+        time.sleep(1)
+        search_contact()
+
+def _print_table_contacts(list_contacts):
+    table = PrettyTable(db.get_schema().keys())
+    for contact in list_contacts:
+        table.add_row([
+            contact.id_contact,
+            contact.name,
+            contact.surname,
+            contact.email,
+            contact.phone,
+            contact.birthday
+        ])
+
+    print(table)
+    print("Pulsa cualquier tecla para continuar")
     command = input()
 
 if __name__ == "__main__":
