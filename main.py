@@ -32,7 +32,7 @@ def run():
     elif command == "L":
         list_contacts()
     elif command == "M":
-        pass
+        update_contact()
     elif command == "E":
         pass
     elif command == "B":
@@ -61,10 +61,14 @@ def create_contact():
     else:
         print("Error al guardar el contacto")
 
-### Forma dinamica de ejecutar metodos de nombre similar
-def check_contact_name(message, data_name):
+# Forma dinamica de ejecutar metodos de nombre similar
+def check_contact_name(message, data_name, force = True):
     print(message)
     input_data = input()
+    
+    if not force and not input_data:
+        return # Por si se deja el input vacio (ya que en el update no cambiara todo el registro)
+
     try:
         getattr(validator, f"validate{data_name.capitalize()}")(input_data)
         # getattr es metodo que se utiliza par invocar metodos de forma dinamica; recibe almenos dos parametros
@@ -76,7 +80,7 @@ def check_contact_name(message, data_name):
         print(err)
         check_contact_name(message, data_name)
 
-## El siguiente bloque de codigo fue remplazo por la funcion anterior
+# El siguiente bloque de codigo fue remplazo por la funcion anterior
 """ Funciones check_contact
 def check_name():
     print("Introduce el nombre del usuario:")
@@ -136,7 +140,7 @@ def list_contacts():
         print("Aun no hay contactos registrados")
 
     _print_table_contacts(list_contacts)
-    """ Remplazado
+    """ Remplazado por la funcion _print_table_contacts()
     table = PrettyTable(db.get_schema().keys())
     for contact in list_contacts:
         table.add_row([
@@ -181,6 +185,39 @@ def search_contact():
         print(err)
         time.sleep(1)
         search_contact()
+
+def update_contact():
+
+    list_contacts()
+
+    print("Introduce el id del contacto que desea modificar")
+    id_object = input()
+
+    data = {}
+    nombre = check_contact_name("Introduce nombre a modificar (deja vacio para no modificar)", "name", False)
+    if nombre:
+        data["NAME"] = nombre
+    apellido = check_contact_name("Introduce apellido a modificar (deja vacio para no modificar)", "surname", False)
+    if apellido:
+        data["SURNAME"] = apellido
+    correo = check_contact_name("Introduce correo a modificar (dejar vacio para no modificar)", "email", False)
+    if correo:
+        data["EMAIL"] = correo
+    telefono = check_contact_name("Introduce telefono a modificar (dejar vacio para no modificar)", "phone", False)
+    if telefono:
+        data["PHONE"] = telefono
+    cumple = check_contact_name("Introduce cumpleaños a modificar YYYY-MM-DD (dejar vacio para no modificar)", "birthday", False)
+    if cumple:
+        data["BIRTHDAY"] = cumple
+
+    try:
+        res = db.update(id_object, data)
+        if res:
+            print("Contacto actuaizado con exito")
+    except ValueError as err:
+        print(err)
+        time.sleep(1)
+        update_contact()
 
 def _print_table_contacts(list_contacts):
     table = PrettyTable(db.get_schema().keys())
