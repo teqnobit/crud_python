@@ -81,6 +81,13 @@ class DBContacts(DBbyCSV):
             object_contacts.append(c)
 
         return object_contacts
+    
+    def update_contact(self, id_object, data):
+        if not id_object:
+            raise ValueError("Es necesario proporcionar un id de usuario")
+        if not data:
+            raise ValueError("Es necesario enviar almenos un parametro a actualizar")
+        self.update(id_object, data)
 
     def get_schema(self):
         return SCHEMA

@@ -1,5 +1,7 @@
 import csv
 import re
+from tempfile import NamedTemporaryFile
+import shutil
 
 class DBbyCSV:
     def __init__(self, schema, filename):
@@ -80,7 +82,7 @@ class DBbyCSV:
             is_header = True
             for row in csv_reader:
                 if is_header:
-                    list_header.append(row)
+                    list_header = row
                     is_header = False
                     continue
 
@@ -97,3 +99,71 @@ class DBbyCSV:
         #with csv_file
         return list_data
     
+    def get_by_id(self, id_object):
+        list_header = []
+        with open(self._filename, mode="r", encoding="utf-16") as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=";")
+            is_header = True
+            for row in csv_reader:
+                if is_header:
+                    list_header = row
+                    is_header = False
+                    continue
+
+                if row:
+                    file = {}
+                    for key, value in enumerate(row):
+                        file[list_header[key]] = value
+                    if file["ID"] == id_object:
+                        return file
+        return {}
+    
+    def update(self, id_object, data):
+        data_csv = self.get_by_id(id_object)
+
+        if not data_csv:
+            raise Exception("No se ha encontrado el usuario con el id solicitado")
+        
+        for key, value in data.items():
+            # Modificamos la busqueda con los datos solicitados
+            data_csv[key] = value
+
+        # Nuevo conocimiento #
+        tempfile = NamedTemporaryFile(mode="w", delete=False, encoding="utf-16")
+
+        list_header = []
+        with open(self._filename, mode="r", encoding="utf-16") as csv_file, tempfile:
+            csv_reader = csv.reader(csv_file, delimiter=";")
+            data_writer = csv.writer(tempfile, delimiter=";", quotechar="\"", lineterminator="\n", quoting=csv.QUOTE_MINIMAL)
+
+            is_header = True
+            for row in csv_reader:
+                if is_header:
+                    list_header = row
+                    is_header = False
+                    data_writer.writerow(row)
+                    continue
+
+                if row:
+                    file = {}
+                    ## Crear el diccionario con los datos de csv
+                    for key, value in enumerate(row):
+                        file[list_header[key]] = value
+                    ## Reescribir en el tempfile(file) todo lo del csv menos el id buscado(data_csv)
+                    if file["ID"] != data_csv["ID"]:
+                        data_writer.writerow(row)
+                        continue
+                    ## agregar lo que cambia al diccionario
+                    for key, value in data_csv.items():
+                        file[key] = value
+
+                    ## Reescribir todo el tempfile con el diccionario completo (ya con cambios)
+                    data_writer.writerow(file.values())
+
+        # Libreria shutil para realizar comando de consola
+        # Le asignamos al archivo temporal el nombre de la db, por lo que:
+        #   - tempfile obtiene el nombre de contacts.csv
+        #   - contacts.csv (viejo) se sobreescribe por el nuevo
+        #   - tempfile deja de ser un arhivo temporal (ya que ahora es otro archivo)
+        shutil.move(tempfile.name, self._filename)
+        return True
