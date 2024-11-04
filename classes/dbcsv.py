@@ -119,6 +119,12 @@ class DBbyCSV:
         return {}
     
     def update(self, id_object, data):
+        return self.modify_file(id_object, data, "update")
+    
+    def delete(self, id_object):
+        return self.modify_file(id_object, {}, "delete")
+    
+    def modify_file(self, id_object, data, action):
         data_csv = self.get_by_id(id_object)
 
         if not data_csv:
@@ -144,7 +150,7 @@ class DBbyCSV:
                     data_writer.writerow(row)
                     continue
 
-                if row:
+                if row and action == "update":
                     file = {}
                     ## Crear el diccionario con los datos de csv
                     for key, value in enumerate(row):
@@ -158,6 +164,15 @@ class DBbyCSV:
                         file[key] = value
 
                     ## Reescribir todo el tempfile con el diccionario completo (ya con cambios)
+                    data_writer.writerow(file.values())
+
+                elif row and action == "delete":
+                    file = {}
+                    for key, value in enumerate(row):
+                        file[list_header[key]] = value
+                    # si es delete simplemente nos saltamos el reinsertar la linea
+                    if file["ID"] == data_csv["ID"]:
+                        continue
                     data_writer.writerow(file.values())
 
         # Libreria shutil para realizar comando de consola

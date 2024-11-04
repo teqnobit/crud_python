@@ -34,7 +34,7 @@ def run():
     elif command == "M":
         update_contact()
     elif command == "E":
-        pass
+        delete_contact()
     elif command == "B":
         search_contact()
     elif command == "S":
@@ -214,10 +214,24 @@ def update_contact():
         res = db.update(id_object, data)
         if res:
             print("Contacto actuaizado con exito")
-    except ValueError as err:
+    except Exception as err:
         print(err)
         time.sleep(1)
         update_contact()
+
+def delete_contact():
+    list_contacts()
+
+    print("Introduce el id del contacto que desea eliminar: ")
+    id_object = input()
+    try:
+        res = db.delete_contact(id_object)
+        if res:
+            print("Contacto eliminado con exito")
+    except Exception as err:
+        print(err)
+        time.sleep(1)
+        delete_contact()
 
 def _print_table_contacts(list_contacts):
     table = PrettyTable(db.get_schema().keys())
@@ -232,8 +246,8 @@ def _print_table_contacts(list_contacts):
         ])
 
     print(table)
-    print("Pulsa cualquier tecla para continuar")
-    command = input()
+    # print("Pulsa cualquier tecla para continuar")
+    # command = input()
 
 if __name__ == "__main__":
     run()

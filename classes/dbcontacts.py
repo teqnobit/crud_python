@@ -89,5 +89,10 @@ class DBContacts(DBbyCSV):
             raise ValueError("Es necesario enviar almenos un parametro a actualizar")
         self.update(id_object, data)
 
+    def delete_contact(self, id_object):
+        if not id_object:
+            raise ValueError("Es necesario proporcionar un id")
+        self.delete(id_object)
+
     def get_schema(self):
         return SCHEMA
