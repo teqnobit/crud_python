@@ -1,36 +1,37 @@
 from .contacts import Contact
-from .dbcsv import DBbyCSV
+# from .dbcsv import DBbyCSV
+from .dbpostgresql import DBPostgresql
 
 SCHEMA = {
-    'ID': {
+    'id': {
         'type': 'autoincrement',
     },
-    'NAME': {
+    'name': {
         'type': 'string',
         'min_length': 3,
         'max_length': 40
     },
-    'SURNAME': {
+    'surname': {
         'type': 'string',
         'min_length': 3,
         'max_length': 50
     },
-    'EMAIL': {
+    'email': {
         'type': 'string',
         'max_length': 254
     },
-    'PHONE': {
+    'phone': {
         'type': 'int'
     },
-    'BIRTHDAY': {
+    'birthday': {
         'type': 'date'
     }
 }
 
-class DBContacts(DBbyCSV):
+class DBContacts(DBPostgresql):
     def __init__(self):
         super().__init__(SCHEMA, 'contacts')
-
+        
     def save_contacts(self, contact):
         data = [contact.name, contact.surname, contact.email, contact.phone, contact.birthday]
         return self.insert(data)
