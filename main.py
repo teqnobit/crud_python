@@ -63,22 +63,24 @@ def create_contact():
 
 # Forma dinamica de ejecutar metodos de nombre similar
 def check_contact_name(message, data_name, force = True):
-    print(message)
-    input_data = input()
+    while True:
+        print(message)
+        input_data = input()
+        
+        if not force and not input_data:
+            return # Por si se deja el input vacio (ya que en el update no cambiara todo el registro)
     
-    if not force and not input_data:
-        return # Por si se deja el input vacio (ya que en el update no cambiara todo el registro)
-
-    try:
-        getattr(validator, f"validate{data_name.capitalize()}")(input_data)
-        # getattr es metodo que se utiliza par invocar metodos de forma dinamica; recibe almenos dos parametros
-        # el primero es el metodo que se desea ejecutar
-        # el segundo es el nombre del metodo que se desea ejecutar
-        # al final se agrega entre parentesis la informacion que espera recibir los parametros del metodo nombrado
-        return input_data
-    except ValueError as err:
-        print(err)
-        check_contact_name(message, data_name)
+        try:
+            getattr(validator, f"validate{data_name.capitalize()}")(input_data)
+            # getattr es metodo que se utiliza par invocar metodos de forma dinamica; recibe almenos dos parametros
+            # el primero es el metodo que se desea ejecutar
+            # el segundo es el nombre del metodo que se desea ejecutar
+            # al final se agrega entre parentesis la informacion que espera recibir los parametros del metodo nombrado
+            return input_data
+        except ValueError as err:
+            print(err)
+            continue
+            # check_contact_name(message, data_name)  # Crea errores de almacenamiento.
 
 # El siguiente bloque de codigo fue remplazo por la funcion anterior
 """ Funciones check_contact
@@ -246,8 +248,8 @@ def _print_table_contacts(list_contacts):
         ])
 
     print(table)
-    # print("Pulsa cualquier tecla para continuar")
-    # command = input()
+    print("Pulsa cualquier tecla para continuar")
+    command = input()
 
 if __name__ == "__main__":
     run()
