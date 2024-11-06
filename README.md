@@ -5,6 +5,7 @@ CRUD de una agenda de contactos en python
 - Uso de clases
 - Conexion a base de datos PostgreSQL
 - Modificacion de CSV
+- Control de pruebas unitarias (unittest)
 - Comandos de consola (shutil)
 - Archivos temporales
 - Expresiones regulares
