@@ -3,9 +3,10 @@ import re
 from environs import Env
 
 class DBPostgresql:
-    def __init__(self, schema, table_name):
+    def __init__(self, schema, table_name, is_test):
         self._table_name = table_name
         self._schema = schema
+        self._is_test = is_test
         
         env = Env()
         env.read_env()
@@ -19,7 +20,7 @@ class DBPostgresql:
 
         self._cur = self._connect.cursor()
         self._launch_query("SELECT 1")
-        print("Conexion establecida con exito")
+        # print("Conexion establecida con exito")  ## No imprimir para mejorar visibilidad de tests
 
         self._create_table()
 
@@ -49,19 +50,21 @@ class DBPostgresql:
         self._launch_query(query)
     
     def _launch_query(self, query):
-        print(query)
+        # print(query)  ## Queary no se imprima para mejorar visibilidad en el prompt
         self._cur.execute(query)
         matches = re.search(r"^SELECT", query, re.IGNORECASE)
-        if not matches:
+        affected = self._cur.rowcount  # Modificado para test
+        if not matches and not self._is_test: # Modificado para test
             self._connect.commit()
+
+        return affected  # Modificado para test
+
 
     def insert(self, data):
         values = "'" + "', '".join(data.values()) + "'"
-        query = f"INSERT INTO public.{self._table_name} ({','.join(data.keys())}) VALUES ({values});"
+        query = f"INSERT INTO public.{self._table_name} ({','.join(data.keys())}) VALUES ({values}) RETURNING id;"
 
-        self._launch_query(query)
-
-        return True
+        return self._launch_query(query) 
     
     def update(self,id_object, data):
         list_update = []
@@ -69,26 +72,30 @@ class DBPostgresql:
             list_update.append(f"{field_name}='{field_value}'")
 
         query = f"UPDATE public.{self._table_name} SET {','.join(list_update)} WHERE id = {id_object};"
-        self._launch_query(query)
+        return self._launch_query(query)
 
     def delete(self, id_object):
         query = f"DELETE FROM public.{self._table_name} WHERE id = {id_object};"
-        self._launch_query(query)
+        return self._launch_query(query)
 
     def get_by_id(self, id_object):
         query = f"SELECT * FROM public.{self._table_name} WHERE id = {id_object}"
-        self._launch_query(query)
 
         table_keys = []
         for schema_key in self._schema.keys():
             table_keys.append(schema_key)
 
         data = {}
+        self._launch_query(query)
         row = self._cur.fetchone()
-        for key, value in enumerate(row):
-            data[table_keys[key]] = value
+        if row:
+            for key, value in enumerate(row):
+                data[table_keys[key]] = value
         
         return data
+
+    def get_last_id(self):
+        return self._cur.fetchone()[0]
 
     def get_by_filter(self, filters=None):
         list_filters = []

@@ -29,8 +29,9 @@ SCHEMA = {
 }
 
 class DBContacts(DBPostgresql):
-    def __init__(self):
-        super().__init__(SCHEMA, 'contacts')
+    def __init__(self, is_test = False):
+        table_name = "contacts"
+        super().__init__(SCHEMA, table_name, is_test)
         
     def save_contacts(self, contact):
         data = {
@@ -94,12 +95,12 @@ class DBContacts(DBPostgresql):
             raise ValueError("Es necesario proporcionar un id de usuario")
         if not data:
             raise ValueError("Es necesario enviar almenos un parametro a actualizar")
-        self.update(id_object, data)
+        return self.update(id_object, data)
 
     def delete_contact(self, id_object):
         if not id_object:
             raise ValueError("Es necesario proporcionar un id")
-        self.delete(id_object)
+        return self.delete(id_object)
 
     def get_schema(self):
         return SCHEMA
