@@ -24,21 +24,21 @@ class DBPostgresql:
         self._create_table()
 
     def _create_table(self):
-        query = f"CREATE TABLE IF NOT EXIST public.{self._table_name} ("
+        query = f"CREATE TABLE IF NOT EXISTS public.{self._table_name} ("
         primary_key = ""
-        for field_name, config in self._table_name.items():
+        for field_name, config in self._schema.items():
             if config["type"] == "autoincrement":
                 query += f"{field_name} serial,"
                 primary_key = f"PRIMARY KEY ({field_name})"
 
-            elif config["type"] in ["string", "int"]:
+            elif config["type"] in ["string", "bigint"]:
                 if config["type"] == "string":
                     query += f"{field_name} character varying"
                 else:
-                    query += f"{field_name} integer"
+                    query += f"{field_name} bigint"
 
                 if "max_length" in config:
-                    query += f"({config["max_length"]})"
+                    query += f"({config['max_length']})"
                 query += ","
 
             elif config["type"] == "date":
@@ -57,7 +57,7 @@ class DBPostgresql:
 
     def insert(self, data):
         values = "'" + "', '".join(data.values()) + "'"
-        query = f"INSERT INTO public.{self._table_name} ({",".join(data.keys())}) VALUES ({values});"
+        query = f"INSERT INTO public.{self._table_name} ({','.join(data.keys())}) VALUES ({values});"
 
         self._launch_query(query)
 

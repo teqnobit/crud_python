@@ -21,7 +21,7 @@ SCHEMA = {
         'max_length': 254
     },
     'phone': {
-        'type': 'int'
+        'type': 'bigint'
     },
     'birthday': {
         'type': 'date'
@@ -33,7 +33,13 @@ class DBContacts(DBPostgresql):
         super().__init__(SCHEMA, 'contacts')
         
     def save_contacts(self, contact):
-        data = [contact.name, contact.surname, contact.email, contact.phone, contact.birthday]
+        data = {
+            "name":contact.name, 
+            "surname":contact.surname, 
+            "email":contact.email, 
+            "phone":contact.phone, 
+            "birthday":contact.birthday
+        }
         return self.insert(data)
     
     def list_contacts(self):
@@ -57,8 +63,8 @@ class DBContacts(DBPostgresql):
         return object_contacts
         """
     
-    def search_users(self, filters):
-        if 'NAME' not in filters and 'SURNAME' not in filters and 'EMAIL' not in filters:
+    def search_contacts(self, filters):
+        if not filters:
             raise ValueError("Debes enviar al menos un filtro")
         
         list_contacts = self.get_by_filter(filters)
@@ -72,12 +78,12 @@ class DBContacts(DBPostgresql):
         # convertirmos los datos a objetos de tipo Contact
         for contact in list_contacts:
             c = Contact(
-                contact["ID"], 
-                contact["NAME"],
-                contact["SURNAME"],
-                contact["EMAIL"],
-                contact["PHONE"],
-                contact["BIRTHDAY"]
+                contact["id"], 
+                contact["name"],
+                contact["surname"],
+                contact["email"],
+                contact["phone"],
+                contact["birthday"]
             )
             object_contacts.append(c)
 
