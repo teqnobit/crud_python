@@ -1,38 +1,45 @@
 from .contacts import Contact
-from .dbcsv import DBbyCSV
+# from .dbcsv import DBbyCSV
+from .dbpostgresql import DBPostgresql
 
 SCHEMA = {
-    'ID': {
+    'id': {
         'type': 'autoincrement',
     },
-    'NAME': {
+    'name': {
         'type': 'string',
         'min_length': 3,
         'max_length': 40
     },
-    'SURNAME': {
+    'surname': {
         'type': 'string',
         'min_length': 3,
         'max_length': 50
     },
-    'EMAIL': {
+    'email': {
         'type': 'string',
         'max_length': 254
     },
-    'PHONE': {
-        'type': 'int'
+    'phone': {
+        'type': 'bigint'
     },
-    'BIRTHDAY': {
+    'birthday': {
         'type': 'date'
     }
 }
 
-class DBContacts(DBbyCSV):
+class DBContacts(DBPostgresql):
     def __init__(self):
         super().__init__(SCHEMA, 'contacts')
-
+        
     def save_contacts(self, contact):
-        data = [contact.name, contact.surname, contact.email, contact.phone, contact.birthday]
+        data = {
+            "name":contact.name, 
+            "surname":contact.surname, 
+            "email":contact.email, 
+            "phone":contact.phone, 
+            "birthday":contact.birthday
+        }
         return self.insert(data)
     
     def list_contacts(self):
@@ -56,8 +63,8 @@ class DBContacts(DBbyCSV):
         return object_contacts
         """
     
-    def search_users(self, filters):
-        if 'NAME' not in filters and 'SURNAME' not in filters and 'EMAIL' not in filters:
+    def search_contacts(self, filters):
+        if not filters:
             raise ValueError("Debes enviar al menos un filtro")
         
         list_contacts = self.get_by_filter(filters)
@@ -71,12 +78,12 @@ class DBContacts(DBbyCSV):
         # convertirmos los datos a objetos de tipo Contact
         for contact in list_contacts:
             c = Contact(
-                contact["ID"], 
-                contact["NAME"],
-                contact["SURNAME"],
-                contact["EMAIL"],
-                contact["PHONE"],
-                contact["BIRTHDAY"]
+                contact["id"], 
+                contact["name"],
+                contact["surname"],
+                contact["email"],
+                contact["phone"],
+                contact["birthday"]
             )
             object_contacts.append(c)
 

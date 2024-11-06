@@ -63,22 +63,24 @@ def create_contact():
 
 # Forma dinamica de ejecutar metodos de nombre similar
 def check_contact_name(message, data_name, force = True):
-    print(message)
-    input_data = input()
-    
-    if not force and not input_data:
-        return # Por si se deja el input vacio (ya que en el update no cambiara todo el registro)
+    while True:
+        print(message)
+        input_data = input()
+        
+        if not force and not input_data:
+            return # Por si se deja el input vacio (ya que en el update no cambiara todo el registro)
 
-    try:
-        getattr(validator, f"validate{data_name.capitalize()}")(input_data)
-        # getattr es metodo que se utiliza par invocar metodos de forma dinamica; recibe almenos dos parametros
-        # el primero es el metodo que se desea ejecutar
-        # el segundo es el nombre del metodo que se desea ejecutar
-        # al final se agrega entre parentesis la informacion que espera recibir los parametros del metodo nombrado
-        return input_data
-    except ValueError as err:
-        print(err)
-        check_contact_name(message, data_name)
+        try:
+            getattr(validator, f"validate{data_name.capitalize()}")(input_data)
+            # getattr es metodo que se utiliza par invocar metodos de forma dinamica; recibe almenos dos parametros
+            # el primero es el metodo que se desea ejecutar
+            # el segundo es el nombre del metodo que se desea ejecutar
+            # al final se agrega entre parentesis la informacion que espera recibir los parametros del metodo nombrado
+            return input_data
+        except ValueError as err:
+            print(err)
+            continue
+            # check_contact_name(message, data_name, force)   # Da error si la validacion no es correcta (recursividad vacia)
 
 # El siguiente bloque de codigo fue remplazo por la funcion anterior
 """ Funciones check_contact
@@ -163,20 +165,20 @@ def search_contact():
     print("Buscar nombre (dejar vacio para usar otro filtro): ")
     nombre = input()
     if nombre:
-        filters["NAME"] = nombre
+        filters["name"] = nombre
 
     print("Buscar apellido (dejar vacio para usar otro filtro): ")
     apellido = input()
     if apellido:
-        filters["SURNAME"] = apellido
+        filters["surname"] = apellido
 
     print("Buscar email (dejar vacio para usar otro filtro): ")
     correo = input()
     if correo:
-        filters["EMAIL"] = correo
+        filters["email"] = correo
 
     try:
-        list_contacts = db.search_users(filters)
+        list_contacts = db.search_contacts(filters)
         if not list_contacts:
             return print("No hay ningun contacto con esos criterios de busqueda")
         
@@ -196,19 +198,19 @@ def update_contact():
     data = {}
     nombre = check_contact_name("Introduce nombre a modificar (deja vacio para no modificar)", "name", False)
     if nombre:
-        data["NAME"] = nombre
+        data["name"] = nombre
     apellido = check_contact_name("Introduce apellido a modificar (deja vacio para no modificar)", "surname", False)
     if apellido:
-        data["SURNAME"] = apellido
+        data["surname"] = apellido
     correo = check_contact_name("Introduce correo a modificar (dejar vacio para no modificar)", "email", False)
     if correo:
-        data["EMAIL"] = correo
+        data["email"] = correo
     telefono = check_contact_name("Introduce telefono a modificar (dejar vacio para no modificar)", "phone", False)
     if telefono:
-        data["PHONE"] = telefono
+        data["phone"] = telefono
     cumple = check_contact_name("Introduce cumpleaños a modificar YYYY-MM-DD (dejar vacio para no modificar)", "birthday", False)
     if cumple:
-        data["BIRTHDAY"] = cumple
+        data["birthday"] = cumple
 
     try:
         res = db.update(id_object, data)
@@ -246,8 +248,8 @@ def _print_table_contacts(list_contacts):
         ])
 
     print(table)
-    # print("Pulsa cualquier tecla para continuar")
-    # command = input()
+    print("Pulsa cualquier tecla para continuar")
+    command = input()
 
 if __name__ == "__main__":
     run()
